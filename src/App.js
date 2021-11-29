@@ -1,25 +1,54 @@
-import logo from './logo.svg';
-import './App.css';
+import './App.css'
+import { useEffect } from 'react'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+
+import Header from './Header'
+import Home from './Home'
+import Checkout from './Checkout'
+import Login from './Login'
+import { auth } from './firebase'
+import { useStateValue } from './StateProvider'
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [{}, dispatch] = useStateValue()
+
+    useEffect(() => {
+        auth.onAuthStateChanged((authUser) => {
+            if (authUser) {
+                dispatch({
+                    type: 'SET_USER',
+                    user: authUser,
+                })
+                console.log(authUser)
+            } else {
+                dispatch({
+                    type: 'SET_USER',
+                    user: null,
+                })
+            }
+        })
+    }, [])
+
+    return (
+        <Router>
+            <div className='app'>
+                <Header />
+
+                <Switch>
+                    <Route path='/login'>
+                        <Login />
+                    </Route>
+                    <Route path='/checkout'>
+                        <Checkout />
+                    </Route>
+                    <Route path='/'>
+                        {/* Home */}
+                        <Home> </Home>
+                    </Route>
+                </Switch>
+            </div>
+        </Router>
+    )
 }
 
-export default App;
+export default App
